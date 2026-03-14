@@ -92,7 +92,7 @@ for i, noticia in enumerate(noticias, 1):
     
     print(f"{i:<4} {titulo_corto:<50} {noticia['points']:<10} {noticia['time']:<20} {noticia['comments']:<10}")
 
-print("="*120)
+
 
 # Mostrar también como lista de diccionarios
 print("\n" + "="*120)
@@ -102,12 +102,11 @@ print("="*120 + "\n")
 import json
 print(json.dumps(noticias[:5], indent=2, ensure_ascii=False))
 
-print("\n" + "="*120)
 
 # FASE 4: DESAFÍO DE CLASIFICACIÓN (BONUS)
 print("\n" + "="*120)
-print(f"{'FASE 4: DESAFÍO DE CLASIFICACIÓN - NOTICIAS POPULARES (>100 POINTS)':^120}")
-print("="*120)
+print(f"{'NOTICIAS POPULARES (>100 POINTS)':^120}")
+
 
 # Filtrar noticias con más de 100 puntos
 noticias_populares = [noticia for noticia in noticias if noticia['points'] > 100]
@@ -126,7 +125,6 @@ for i, noticia in enumerate(noticias_populares_ordenadas, 1):
     
     print(f"{i:<4} {titulo_corto:<50} {noticia['points']:<10} {noticia['time']:<20} {noticia['comments']:<10}")
 
-print("="*120)
 
 # Mostrar también en formato de lista de diccionarios
 print("\n" + "="*120)
@@ -136,7 +134,7 @@ print("="*120 + "\n")
 print(json.dumps(noticias_populares_ordenadas, indent=2, ensure_ascii=False))
 
 print("\n" + "="*120)
-print(f"\n✓ Extracción completada exitosamente")
-print(f"✓ Dataset completo: {len(noticias)} noticias")
-print(f"✓ Noticias populares (>100 points): {len(noticias_populares_ordenadas)} noticias")
-print(f"✓ Ordenadas de mayor a menor popularidad\n")
+print(f"\n Extracción completada exitosamente")
+print(f" Dataset completo: {len(noticias)} noticias")
+print(f" Noticias populares (>100 points): {len(noticias_populares_ordenadas)} noticias")
+print(f" Ordenadas de mayor a menor popularidad\n") 
