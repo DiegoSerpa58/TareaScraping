@@ -15,7 +15,7 @@ for fila in soup.find_all("tr", class_="athing"):
     titulo = fila.find("span", class_="titleline").a.get_text(strip=True)
     # El subtext está en la siguiente fila (tr) después de la fila de la noticia
     subtext = fila.find_next_sibling("tr").find("td", class_="subtext")
-
+    # Extraer puntos y tiempo, manejando casos donde no existan
     puntos = int(subtext.find("span", class_="score").text.split()[0]) if subtext.find("span", class_="score") else 0
     tiempo = subtext.find("span", class_="age").text if subtext.find("span", class_="age") else "N/A"
 # Extraer número de comentarios
@@ -70,6 +70,7 @@ noticias_populares = sorted(
 
 print(f"Total de noticias con más de 100 puntos: {len(noticias_populares)}")
 print("="*120)
+# Truncar título si es muy largo para mantener formato de tabla
 print(f"{'#':<4} {'TÍTULO':<50} {'POINTS':<10} {'TIME':<20} {'COMMENTS':<10}")
 print("="*120)
 
