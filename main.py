@@ -52,6 +52,7 @@ for i, n in enumerate(noticias, 1):
 print("\n" + "="*120)
 print(f"{'LISTA DE DICCIONARIOS (Primeras 5 noticias)':^120}")
 
+# Imprimir las primeras 5 noticias como lista de diccionarios
 print(json.dumps(noticias[:5], indent=2, ensure_ascii=False))
 
 
