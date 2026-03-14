@@ -41,10 +41,6 @@ for fila in soup.find_all("tr", class_="athing"):
     # Luego buscamos el td.subtext donde están puntos, tiempo y comentarios.
     subtext = fila.find_next_sibling("tr").find("td", class_="subtext")
 
-    # EXTRAER PUNTOS Y TIEMPO (con valores default)
-    # Algunas publicaciones (por ejemplo ofertas de empleo) NO tienen puntos (score),
-    # entonces si no existe span.score asignamos 0.
-    # "153 points" -> split()[0] -> "153" -> int(...) -> 153
     puntos = int(subtext.find("span", class_="score").text.split()[0]) if subtext.find("span", class_="score") else 0
 
     # El tiempo relativo suele estar en: <span class="age">5 hours ago</span>
@@ -109,7 +105,6 @@ for i, n in enumerate(noticias, 1):
 print("\n" + "="*120)
 print(f"{'LISTA DE DICCIONARIOS (Primeras 5 noticias)':^120}")
 
-# json.dumps convierte la lista/diccionarios a texto JSON con identación
 print(json.dumps(noticias[:5], indent=2, ensure_ascii=False))
 
 # Filtrar las noticias que tengan más de 100 puntos.
@@ -131,6 +126,7 @@ noticias_populares = sorted(
 
 print(f"Total de noticias con más de 100 puntos: {len(noticias_populares)}")
 print("="*120)
+# Truncar título si es muy largo para mantener formato de tabla
 print(f"{'#':<4} {'TÍTULO':<50} {'POINTS':<10} {'TIME':<20} {'COMMENTS':<10}")
 print("="*120)
 
