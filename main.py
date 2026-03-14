@@ -2,89 +2,87 @@ import requests
 from bs4 import BeautifulSoup
 import json
 
-URL = "https://news.ycombinator.com/"
+url = "https://news.ycombinator.com/"
+soup = BeautifulSoup(requests.get(url).text, "html.parser")
 
+noticias = []
 
-def extraer_noticias(url: str) -> list[dict]:
-    soup = BeautifulSoup(requests.get(url).text, "html.parser")
-    noticias = []
+for fila in soup.find_all("tr", class_="athing"):
 
-    for athing in soup.select("tr.athing"):
-        # Title
-        a = athing.select_one("span.titleline a")
-        if not a:
-            continue
-        title = a.get_text(strip=True)
+    titulo = fila.find("span", class_="titleline").a.get_text(strip=True)
+    subtext = fila.find_next_sibling("tr").find("td", class_="subtext")
 
-        # Subtext row (sibling)
-        sub = athing.find_next_sibling("tr")
-        subtext = sub.select_one("td.subtext") if sub else None
+    puntos = int(subtext.find("span", class_="score").text.split()[0]) if subtext.find("span", class_="score") else 0
+    tiempo = subtext.find("span", class_="age").text if subtext.find("span", class_="age") else "N/A"
 
-        # Defaults for missing data
-        points = 0
-        time = "N/A"
-        comments = 0
+    comentarios = 0
+    for link in reversed(subtext.find_all("a")):
+        txt = link.text
+        if "comment" in txt:
+            comentarios = int(txt.split()[0])
+            break
+        elif txt == "discuss":
+            break
 
-        if subtext:
-            score = subtext.select_one("span.score")
-            if score:
-                # "153 points" -> 153
-                points = int(score.get_text(strip=True).split()[0])
+    noticias.append({
+        "title": titulo,
+        "points": puntos,
+        "time": tiempo,
+        "comments": comentarios
+    })
 
-            age = subtext.select_one("span.age a")
-            if age:
-                time = age.get_text(strip=True)
+# TABLA GENERAL
+print(f"Total de noticias extraídas: {len(noticias)}")
+print("="*120)
+print(f"{'#':<4} {'TÍTULO':<50} {'POINTS':<10} {'TIME':<20} {'COMMENTS':<10}")
+print("="*120)
 
-            # Comments: last <a> often is comments or "discuss"
-            last_a = subtext.select("a")[-1] if subtext.select("a") else None
-            if last_a:
-                txt = last_a.get_text(strip=True).lower()
-                if "comment" in txt:
-                    comments = int(txt.split()[0])  # "158 comments" -> 158
-                elif txt == "discuss":
-                    comments = 0
+for i, n in enumerate(noticias, 1):
+    titulo = n['title'][:47] + "..." if len(n['title']) > 50 else n['title']
+    print(f"{i:<4} {titulo:<50} {n['points']:<10} {n['time']:<20} {n['comments']:<10}")
 
-        noticias.append({"title": title, "points": points, "time": time, "comments": comments})
+print("="*120)
 
-    return noticias
+# LISTA DE DICCIONARIOS
+print("\n" + "="*120)
+print(f"{'LISTA DE DICCIONARIOS (Primeras 5 noticias)':^120}")
+print("="*120 + "\n")
 
+print(json.dumps(noticias[:5], indent=2, ensure_ascii=False))
 
-def imprimir_tabla(data: list[dict], titulo: str) -> None:
-    # Column widths (simple & readable)
-    w_num, w_title, w_points, w_time, w_comments = 4, 60, 8, 20, 10
+print("\n" + "="*120)
 
-    def cut(s: str, w: int) -> str:
-        return (s[: w - 3] + "...") if len(s) > w else s
+# FASE 4: CLASIFICACIÓN
+print("\n" + "="*120)
+print(f"{'FASE 4: DESAFÍO DE CLASIFICACIÓN - NOTICIAS POPULARES (>100 POINTS)':^120}")
+print("="*120)
 
-    print("\n" + "=" * 120)
-    print(f"{titulo:^120}")
-    print("=" * 120)
-    print(f"{'#':<{w_num}} {'TÍTULO':<{w_title}} {'PTS':<{w_points}} {'TIME':<{w_time}} {'COMMENTS':<{w_comments}}")
-    print("-" * 120)
+noticias_populares = sorted(
+    [n for n in noticias if n["points"] > 100],
+    key=lambda x: x["points"],
+    reverse=True
+)
 
-    for i, n in enumerate(data, 1):
-        print(
-            f"{i:<{w_num}} "
-            f"{cut(n['title'], w_title):<{w_title}} "
-            f"{n['points']:<{w_points}} "
-            f"{cut(n['time'], w_time):<{w_time}} "
-            f"{n['comments']:<{w_comments}}"
-        )
+print(f"Total de noticias con más de 100 puntos: {len(noticias_populares)}")
+print("="*120)
+print(f"{'#':<4} {'TÍTULO':<50} {'POINTS':<10} {'TIME':<20} {'COMMENTS':<10}")
+print("="*120)
 
-    print("=" * 120)
-    print(f"Total: {len(data)}")
+for i, n in enumerate(noticias_populares, 1):
+    titulo = n['title'][:47] + "..." if len(n['title']) > 50 else n['title']
+    print(f"{i:<4} {titulo:<50} {n['points']:<10} {n['time']:<20} {n['comments']:<10}")
 
+print("="*120)
 
-if __name__ == "__main__":
-    noticias = extraer_noticias(URL)
+# LISTA FINAL
+print("\n" + "="*120)
+print(f"{'NOTICIAS POPULARES - FORMATO LISTA DE DICCIONARIOS':^120}")
+print("="*120 + "\n")
 
-    # Fase 3: Dataset completo (tabla)
-    imprimir_tabla(noticias, "DATASET")
+print(json.dumps(noticias_populares, indent=2, ensure_ascii=False))
 
-    # Lista de diccionarios (si la necesitas para entregar / verificar)
-    print("\nLISTA DE DICCIONARIOS (primeras 5):")
-    print(json.dumps(noticias[:5], indent=2, ensure_ascii=False))
-
-    # Fase 4 (Bonus): Filtrar > 100 puntos y ordenar desc por points
-    populares = sorted([n for n in noticias if n["points"] > 100], key=lambda x: x["points"], reverse=True)
-    imprimir_tabla(populares, "POPULARES (> 100 PUNTOS)")
+print("\n" + "="*120)
+print(f"\n✓ Extracción completada exitosamente")
+print(f"✓ Dataset completo: {len(noticias)} noticias")
+print(f"✓ Noticias populares (>100 points): {len(noticias_populares)} noticias")
+print(f"✓ Ordenadas de mayor a menor popularidad\n")
